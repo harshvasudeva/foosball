@@ -96,15 +96,18 @@ export function FoosballTable() {
         const homeIndices = [0, 1, 3, 5];
         const awayIndices = [2, 4, 6, 7];
 
-        const applyLogic = (indices: number[], ctrl: any) => {
+        const applyLogic = (indices: number[], ctrl: any, team: 'home' | 'away') => {
             let zVel = 0;
             let rotVel = 0;
 
             if (ctrl.up) zVel = -moveSpeed;
             if (ctrl.down) zVel = moveSpeed;
 
-            if (ctrl.left) rotVel = -rotSpeed; // Inverted: Left = Negative (Backwards/Up)
-            if (ctrl.right) rotVel = rotSpeed; // Inverted: Right = Positive (Forward/Down)
+            // Invert rotation for Away team because they face the opposite direction
+            const rotDir = team === 'home' ? 1 : -1;
+
+            if (ctrl.left) rotVel = -rotSpeed * rotDir;
+            if (ctrl.right) rotVel = rotSpeed * rotDir;
 
             indices.forEach(idx => {
                 const body = rodBodies.current[idx];
@@ -136,12 +139,12 @@ export function FoosballTable() {
             });
         };
 
-        if (myTeam === 'home') applyLogic(homeIndices, myControls);
-        else if (myTeam === 'away') applyLogic(awayIndices, myControls);
+        if (myTeam === 'home') applyLogic(homeIndices, myControls, 'home');
+        else if (myTeam === 'away') applyLogic(awayIndices, myControls, 'away');
 
         // Apply Remote
-        if (myTeam === 'home') applyLogic(awayIndices, remoteControlsRef.current);
-        else if (myTeam === 'away') applyLogic(homeIndices, remoteControlsRef.current);
+        if (myTeam === 'home') applyLogic(awayIndices, remoteControlsRef.current, 'away');
+        else if (myTeam === 'away') applyLogic(homeIndices, remoteControlsRef.current, 'home');
 
         // 2. Step Physics
         world.step(1 / 60, delta, 3);
