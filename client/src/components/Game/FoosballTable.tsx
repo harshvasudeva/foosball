@@ -195,43 +195,35 @@ export function FoosballTable() {
             </mesh>
 
 
-            {/* --- Premium Cyber Walls --- */}
+            {/* --- Integrated Table Frame --- */}
 
-            {/* Reusable Wall Material props */}
-            {/* We inline them to avoid complexity in this edit, simplified style: Dark Metal with Neon Top Edge */}
-
-            {/* Side Wall Top (Far Side z = -3.8) */}
+            {/* Side Walls (Long) */}
             <group position={[0, 0.5, -3.8]}>
-                {/* Main Frame */}
                 <mesh castShadow receiveShadow>
-                    <boxGeometry args={[12.4, 1, 0.4]} />
+                    <boxGeometry args={[14.4, 1, 0.4]} /> {/* Longer to cover goal depth */}
                     <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
                 </mesh>
-                {/* Neon Trim Inner */}
                 <mesh position={[0, 0.5, 0.21]}>
-                    <boxGeometry args={[12.4, 0.05, 0.05]} />
+                    <boxGeometry args={[14.4, 0.05, 0.05]} />
                     <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={2} toneMapped={false} />
                 </mesh>
             </group>
 
-            {/* Side Wall Bottom (Near Side z = +3.8) */}
             <group position={[0, 0.5, 3.8]}>
-                {/* Main Frame */}
                 <mesh castShadow receiveShadow>
-                    <boxGeometry args={[12.4, 1, 0.4]} />
+                    <boxGeometry args={[14.4, 1, 0.4]} />
                     <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
                 </mesh>
-                {/* Neon Trim Inner */}
                 <mesh position={[0, 0.5, -0.21]}>
-                    <boxGeometry args={[12.4, 0.05, 0.05]} />
+                    <boxGeometry args={[14.4, 0.05, 0.05]} />
                     <meshStandardMaterial color="#e879f9" emissive="#e879f9" emissiveIntensity={2} toneMapped={false} />
                 </mesh>
             </group>
 
-            {/* Corner Walls (Leaving gap for goal) */}
+            {/* End Walls (Connecting Sides) with Goal Cutout */}
 
-            {/* Left Top */}
-            <group position={[-6.2, 0.5, -2.3]}>
+            {/* Left End (Home) - Top Part */}
+            <group position={[-7.0, 0.5, -2.3]}>
                 <mesh castShadow receiveShadow>
                     <boxGeometry args={[0.4, 1, 2.6]} />
                     <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
@@ -242,8 +234,8 @@ export function FoosballTable() {
                 </mesh>
             </group>
 
-            {/* Left Bottom */}
-            <group position={[-6.2, 0.5, 2.3]}>
+            {/* Left End (Home) - Bottom Part */}
+            <group position={[-7.0, 0.5, 2.3]}>
                 <mesh castShadow receiveShadow>
                     <boxGeometry args={[0.4, 1, 2.6]} />
                     <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
@@ -254,8 +246,8 @@ export function FoosballTable() {
                 </mesh>
             </group>
 
-            {/* Right Top */}
-            <group position={[6.2, 0.5, -2.3]}>
+            {/* Right End (Away) - Top Part */}
+            <group position={[7.0, 0.5, -2.3]}>
                 <mesh castShadow receiveShadow>
                     <boxGeometry args={[0.4, 1, 2.6]} />
                     <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
@@ -266,8 +258,8 @@ export function FoosballTable() {
                 </mesh>
             </group>
 
-            {/* Right Bottom */}
-            <group position={[6.2, 0.5, 2.3]}>
+            {/* Right End (Away) - Bottom Part */}
+            <group position={[7.0, 0.5, 2.3]}>
                 <mesh castShadow receiveShadow>
                     <boxGeometry args={[0.4, 1, 2.6]} />
                     <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
@@ -278,59 +270,37 @@ export function FoosballTable() {
                 </mesh>
             </group>
 
+            {/* Goal Back Walls (Closing the loop) */}
 
-            {/* Goal Boxes (Visuals) */}
-
-            {/* Home Goal Box (Left) */}
+            {/* Home Side Back Wall */}
             <group position={[-7.0, 0.5, 0]}>
-                {/* Back Netting */}
-                <mesh position={[-0.5, 0, 0]} receiveShadow>
-                    <boxGeometry args={[0.1, 1, 2.2]} />
-                    <meshStandardMaterial color="#111" emissive="#00ffff" emissiveIntensity={0.2} transparent opacity={0.8} />
+                <mesh castShadow receiveShadow position={[-0.2, 0, 0]}>
+                    <boxGeometry args={[0.4, 1, 2.4]} /> {/* Thinner back wall? */}
+                    <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
                 </mesh>
-                {/* Top/Bottom Frame */}
-                <mesh position={[0, 0.45, 0]}>
-                    <boxGeometry args={[1, 0.1, 2.2]} />
-                    <meshStandardMaterial color="#222" />
-                </mesh>
-                <mesh position={[0, -0.45, 0]}>
-                    <boxGeometry args={[1, 0.1, 2.2]} />
-                    <meshStandardMaterial color="#222" />
-                </mesh>
-                {/* Floor glow */}
-                <mesh position={[0, -0.4, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                    <planeGeometry args={[1, 2]} />
-                    <meshBasicMaterial color="#00ffff" transparent opacity={0.3} />
+                {/* Goal Internal Glow/Net */}
+                <mesh position={[0, -0.45, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                    <planeGeometry args={[0.8, 2]} />
+                    <meshBasicMaterial color="#00ffff" transparent opacity={0.2} />
                 </mesh>
             </group>
 
-            {/* Away Goal Box (Right) */}
+            {/* Away Side Back Wall */}
             <group position={[7.0, 0.5, 0]}>
-                {/* Back Netting */}
-                <mesh position={[0.5, 0, 0]} receiveShadow>
-                    <boxGeometry args={[0.1, 1, 2.2]} />
-                    <meshStandardMaterial color="#111" emissive="#e879f9" emissiveIntensity={0.2} transparent opacity={0.8} />
+                <mesh castShadow receiveShadow position={[0.2, 0, 0]}>
+                    <boxGeometry args={[0.4, 1, 2.4]} />
+                    <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
                 </mesh>
-                {/* Top/Bottom Frame */}
-                <mesh position={[0, 0.45, 0]}>
-                    <boxGeometry args={[1, 0.1, 2.2]} />
-                    <meshStandardMaterial color="#222" />
-                </mesh>
-                <mesh position={[0, -0.45, 0]}>
-                    <boxGeometry args={[1, 0.1, 2.2]} />
-                    <meshStandardMaterial color="#222" />
-                </mesh>
-                {/* Floor glow */}
-                <mesh position={[0, -0.4, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                    <planeGeometry args={[1, 2]} />
-                    <meshBasicMaterial color="#e879f9" transparent opacity={0.3} />
+                {/* Goal Internal Glow/Net */}
+                <mesh position={[0, -0.45, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                    <planeGeometry args={[0.8, 2]} />
+                    <meshBasicMaterial color="#e879f9" transparent opacity={0.2} />
                 </mesh>
             </group>
 
             {/* Rods */}
             {/* Rods */}
             {/* Home: Indices 0, 1, 3, 5 */}
-            {/* Away: Indices 2, 4, 6, 7 */}
 
             <Rod ref={(el) => setRodRef(el, 0)} position={[-5.5, 0]} players={1} team="home" />
             <Rod ref={(el) => setRodRef(el, 1)} position={[-4.0, 0]} players={2} team="home" />
