@@ -103,11 +103,12 @@ export function FoosballTable() {
             if (ctrl.up) zVel = -moveSpeed;
             if (ctrl.down) zVel = moveSpeed;
 
-            // Invert rotation for Away team because they face the opposite direction
-            const rotDir = team === 'home' ? 1 : -1;
+            // Both players view the board from the same angle, so controls should be absolute direction
+            // Left Key = Rotate Top to Left (Negative Rotation?)
+            // Right Key = Rotate Top to Right
 
-            if (ctrl.left) rotVel = -rotSpeed * rotDir;
-            if (ctrl.right) rotVel = rotSpeed * rotDir;
+            if (ctrl.left) rotVel = -rotSpeed;
+            if (ctrl.right) rotVel = rotSpeed;
 
             indices.forEach(idx => {
                 const body = rodBodies.current[idx];
@@ -200,6 +201,47 @@ export function FoosballTable() {
                 <boxGeometry args={[0.2, 1, 7.4]} />
                 <meshStandardMaterial color="#4a3b32" />
             </mesh>
+
+            {/* Goals Visuals */}
+            {/* Home Goal (Left) */}
+            <group position={[-6.4, 0.5, 0]}>
+                <mesh castShadow receiveShadow position={[0, 0, -2]}>
+                    <boxGeometry args={[0.5, 2, 0.1]} />
+                    <meshStandardMaterial color="#333" />
+                </mesh>
+                <mesh castShadow receiveShadow position={[0, 0, 2]}>
+                    <boxGeometry args={[0.5, 2, 0.1]} />
+                    <meshStandardMaterial color="#333" />
+                </mesh>
+                <mesh castShadow receiveShadow position={[0, 1, 0]}>
+                    <boxGeometry args={[0.5, 0.1, 4]} />
+                    <meshStandardMaterial color="#333" />
+                </mesh>
+                <mesh position={[0, 0, 0]}>
+                    <boxGeometry args={[0.1, 1.8, 3.8]} />
+                    <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.5} transparent opacity={0.2} />
+                </mesh>
+            </group>
+
+            {/* Away Goal (Right) */}
+            <group position={[6.4, 0.5, 0]}>
+                <mesh castShadow receiveShadow position={[0, 0, -2]}>
+                    <boxGeometry args={[0.5, 2, 0.1]} />
+                    <meshStandardMaterial color="#333" />
+                </mesh>
+                <mesh castShadow receiveShadow position={[0, 0, 2]}>
+                    <boxGeometry args={[0.5, 2, 0.1]} />
+                    <meshStandardMaterial color="#333" />
+                </mesh>
+                <mesh castShadow receiveShadow position={[0, 1, 0]}>
+                    <boxGeometry args={[0.5, 0.1, 4]} />
+                    <meshStandardMaterial color="#333" />
+                </mesh>
+                <mesh position={[0, 0, 0]}>
+                    <boxGeometry args={[0.1, 1.8, 3.8]} />
+                    <meshStandardMaterial color="#e879f9" emissive="#e879f9" emissiveIntensity={0.5} transparent opacity={0.2} />
+                </mesh>
+            </group>
 
             {/* Rods */}
             {/* Rods */}
