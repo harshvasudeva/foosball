@@ -19,6 +19,7 @@ interface Room {
     id: string;
     players: string[];
     ready: Record<string, boolean>;
+    score: { home: number, away: number };
 }
 
 const rooms: Record<string, Room> = {};
@@ -31,7 +32,8 @@ io.on('connection', (socket) => {
         rooms[roomId] = {
             id: roomId,
             players: [socket.id],
-            ready: { [socket.id]: false }
+            ready: { [socket.id]: false },
+            score: { home: 0, away: 0 }
         };
         socket.join(roomId);
         socket.emit('room_created', { roomId, role: 'host' });
@@ -57,6 +59,22 @@ io.on('connection', (socket) => {
 
     socket.on('input_change', (data: { roomId: string, inputs: any }) => {
         socket.to(data.roomId).emit('input_update', { playerId: socket.id, inputs: data.inputs, timestamp: Date.now() });
+    });
+
+    // Goal Scored Event
+    socket.on('goal_scored', (data: { roomId: string, team: 'home' | 'away' }) => {
+        const room = rooms[data.roomId];
+        if (room) {
+            room.score[data.team]++;
+            io.to(data.roomId).emit('score_update', room.score);
+            io.to(data.roomId).emit('ball_reset'); // Tell clients to reset ball
+
+            // Optional: Win condition
+            if (room.score[data.team] >= 5) {
+                io.to(data.roomId).emit('game_over', { winner: data.team });
+                room.score = { home: 0, away: 0 }; // Reset for next game?
+            }
+        }
     });
 
     socket.on('disconnect', () => {

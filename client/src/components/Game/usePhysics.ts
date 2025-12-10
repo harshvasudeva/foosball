@@ -1,23 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
 import * as CANNON from 'cannon-es';
-import { useFrame } from '@react-three/fiber';
 
 export function usePhysicsEngine() {
     const [world] = useState(() => new CANNON.World());
     const ballBody = useRef<CANNON.Body>(null);
     const rodBodies = useRef<CANNON.Body[]>([]);
+    const goals = useRef<{ home: CANNON.Body, away: CANNON.Body } | null>(null);
 
     useEffect(() => {
         world.gravity.set(0, -9.82, 0);
+
         // Materials
         const groundMat = new CANNON.Material();
         const ballMat = new CANNON.Material();
         const wallMat = new CANNON.Material();
         const playerMat = new CANNON.Material();
 
-        const ballGround = new CANNON.ContactMaterial(groundMat, ballMat, { friction: 0.5, restitution: 0.6 });
-        const ballWall = new CANNON.ContactMaterial(wallMat, ballMat, { friction: 0.1, restitution: 0.8 });
-        const ballPlayer = new CANNON.ContactMaterial(playerMat, ballMat, { friction: 0.3, restitution: 0.5 });
+        const ballGround = new CANNON.ContactMaterial(groundMat, ballMat, { friction: 0.5, restitution: 0.7 });
+        const ballWall = new CANNON.ContactMaterial(wallMat, ballMat, { friction: 0.1, restitution: 0.9 });
+        const ballPlayer = new CANNON.ContactMaterial(playerMat, ballMat, { friction: 0.3, restitution: 0.8 });
 
         world.addContactMaterial(ballGround);
         world.addContactMaterial(ballWall);
@@ -49,21 +50,29 @@ export function usePhysicsEngine() {
         const bBody = new CANNON.Body({ mass: 0.45, shape: new CANNON.Sphere(0.2), position: new CANNON.Vec3(0, 1, 0), material: ballMat });
         bBody.linearDamping = 0.2;
         bBody.angularDamping = 0.2;
+        // Continuous Collision Detection
+        (bBody as any).ccdSpeedThreshold = 1;
+        (bBody as any).ccdParallelism = 1;
+
         world.addBody(bBody);
         ballBody.current = bBody;
 
-        // Rods (Standard Table Layout)
-        // Team A (Home/Red) vs Team B (Away/Blue)
-        // Positions are symmetric around 0. Table length ~12 units (-6 to 6).
-        // 1. Goalie A (1)  -6.5 ?? No, table is -6 to 6.
-        // 2. Defenders A (2)
-        // 3. Strikers B (3)
-        // 4. Midfield A (5)
-        // 5. Midfield B (5)
-        // 6. Strikers A (3)
-        // 7. Defenders B (2)
-        // 8. Goalie B (1)
+        // Goal Sensors (Triggers)
+        const goalShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 2.0)); // Width of goal
 
+        // Home Goal (Left side, defended by Red/Home) -> If ball hits this, AWAY scores
+        const homeGoal = new CANNON.Body({ isTrigger: true, position: new CANNON.Vec3(-6.5, 0.5, 0) });
+        homeGoal.addShape(goalShape);
+        world.addBody(homeGoal);
+
+        // Away Goal (Right side, defended by Blue/Away) -> If ball hits this, HOME scores
+        const awayGoal = new CANNON.Body({ isTrigger: true, position: new CANNON.Vec3(6.5, 0.5, 0) });
+        awayGoal.addShape(goalShape);
+        world.addBody(awayGoal);
+
+        goals.current = { home: homeGoal, away: awayGoal };
+
+        // Rods (Standard Table Layout)
         const rodConfigs = [
             { x: -5.5, players: 1 }, // Home Goalie
             { x: -4.0, players: 2 }, // Home Defenders
@@ -82,11 +91,15 @@ export function usePhysicsEngine() {
                 position: new CANNON.Vec3(config.x, 1, 0),
                 material: playerMat
             });
+            // Store initial position for drift correction
+            (body as any).initPosition = new CANNON.Vec3(config.x, 1, 0);
+
             const players = config.players;
             for (let i = 0; i < players; i++) {
                 const z = (i - (players - 1) / 2) * (6 / players);
-                const shape = new CANNON.Box(new CANNON.Vec3(0.15, 0.4, 0.2));
-                body.addShape(shape, new CANNON.Vec3(0, -0.3, z));
+                // Increased size and offset for better contact
+                const shape = new CANNON.Box(new CANNON.Vec3(0.15, 0.5, 0.2));
+                body.addShape(shape, new CANNON.Vec3(0, -0.45, z));
             }
             world.addBody(body);
             return body;
@@ -94,5 +107,5 @@ export function usePhysicsEngine() {
 
     }, [world]);
 
-    return { world, ballBody, rodBodies };
+    return { world, ballBody, rodBodies, goals };
 }

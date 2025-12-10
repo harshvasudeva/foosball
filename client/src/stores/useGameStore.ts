@@ -7,6 +7,7 @@ interface GameState {
     role: 'host' | 'guest' | null;
     status: 'menu' | 'lobby' | 'playing';
     playerCount: number;
+    score: { home: number, away: number };
     isConnected: boolean;
     connect: () => void;
     createRoom: () => void;
@@ -20,7 +21,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     role: null,
     status: 'menu',
     playerCount: 0,
+    score: { home: 0, away: 0 },
     isConnected: false,
+
+
 
     connect: () => {
         if (get().socket) return;
@@ -49,7 +53,11 @@ export const useGameStore = create<GameState>((set, get) => ({
         });
 
         socket.on('game_start', () => {
-            set({ status: 'playing' });
+            set({ status: 'playing', score: { home: 0, away: 0 } });
+        });
+
+        socket.on('score_update', (score) => {
+            set({ score });
         });
 
         socket.on('player_left', () => {

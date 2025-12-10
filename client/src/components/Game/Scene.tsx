@@ -2,11 +2,15 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Environment } from '@react-three/drei';
 import { FoosballTable } from './FoosballTable';
 import { Suspense } from 'react';
+import { Scoreboard } from './Scoreboard';
 
 export function Scene() {
+    // const { status } = useGameStore();
+
     return (
-        <div className="w-full h-full bg-gray-900">
-            <Canvas shadows camera={{ position: [0, 15, 0], fov: 45 }}>
+        <div className="w-full h-screen bg-slate-900 relative">
+            <Scoreboard />
+            <Canvas shadows camera={{ position: [0, 8, 5], fov: 50 }}>
                 <fog attach="fog" args={['#1a1a1a', 10, 50]} />
                 <ambientLight intensity={0.5} />
                 <spotLight

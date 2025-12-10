@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import * as CANNON from 'cannon-es';
+
 import { usePlayerControls } from './useControls';
 import { useGameStore } from '../../stores/useGameStore';
 import { Rod } from './Rod';
@@ -12,7 +12,36 @@ export function FoosballTable() {
     const allControls = usePlayerControls();
 
     // Physics
-    const { world, ballBody, rodBodies } = usePhysicsEngine();
+    const { world, ballBody, rodBodies, goals } = usePhysicsEngine();
+
+    // Goal Detection (Host Authoritative for simplicity, or simpler: both report? Host preferably)
+    useEffect(() => {
+        if (role !== 'host' || !goals.current) return;
+
+        const handleScore = (e: any) => {
+            // If Home Goal is hit, Away Scored
+            if (e.body === goals.current?.home) {
+                socket?.emit('goal_scored', { roomId, team: 'away' });
+            }
+            // If Away Goal is hit, Home Scored
+            else if (e.body === goals.current?.away) {
+                socket?.emit('goal_scored', { roomId, team: 'home' });
+            }
+        };
+
+        // Cannon.js collision events usually on the body
+        // We can listen to 'collide' on the goals
+        const homeGoal = goals.current.home;
+        const awayGoal = goals.current.away;
+
+        homeGoal.addEventListener('collide', handleScore);
+        awayGoal.addEventListener('collide', handleScore);
+
+        return () => {
+            homeGoal.removeEventListener('collide', handleScore);
+            awayGoal.removeEventListener('collide', handleScore);
+        };
+    }, [role, socket, roomId, goals]);
 
     // Visual Refs
     const ballRef = useRef<THREE.Mesh>(null);
@@ -27,17 +56,31 @@ export function FoosballTable() {
     const prevControlsRef = useRef<any>(myControls);
 
     // Sync Netcode Inputs
+    // Sync Netcode Inputs & Game Logic
     useEffect(() => {
         if (!socket) return;
         const handleInputUpdate = (data: any) => {
             remoteControlsRef.current = data.inputs;
         };
+        const handleBallReset = () => {
+            if (ballBody.current) {
+                ballBody.current.position.set(0, 1, 0);
+                ballBody.current.velocity.set(0, 0, 0);
+                ballBody.current.angularVelocity.set(0, 0, 0);
+            }
+        };
+
         socket.on('input_update', handleInputUpdate);
-        return () => { socket.off('input_update', handleInputUpdate); };
-    }, [socket]);
+        socket.on('ball_reset', handleBallReset);
+
+        return () => {
+            socket.off('input_update', handleInputUpdate);
+            socket.off('ball_reset', handleBallReset);
+        };
+    }, [socket, ballBody]);
 
     // Game Loop
-    useFrame((state, delta) => {
+    useFrame((_, delta) => {
         // 0. Sync Inputs
         if (JSON.stringify(prevControlsRef.current) !== JSON.stringify(myControls)) {
             socket?.emit('input_change', { roomId, inputs: myControls });
@@ -60,8 +103,8 @@ export function FoosballTable() {
             if (ctrl.up) zVel = -moveSpeed;
             if (ctrl.down) zVel = moveSpeed;
 
-            if (ctrl.left) rotVel = rotSpeed;
-            if (ctrl.right) rotVel = -rotSpeed;
+            if (ctrl.left) rotVel = -rotSpeed; // Inverted: Left = Negative (Backwards/Up)
+            if (ctrl.right) rotVel = rotSpeed; // Inverted: Right = Positive (Forward/Down)
 
             indices.forEach(idx => {
                 const body = rodBodies.current[idx];
@@ -84,8 +127,8 @@ export function FoosballTable() {
 
                     // Correction: Keep X/Y position constant to prevent drift from collisions
                     // Kinematic bodies shouldn't drift, but good to be safe if types change
-                    body.position.x = body.initPosition.x;
-                    body.position.y = body.initPosition.y;
+                    body.position.x = (body as any).initPosition.x;
+                    body.position.y = (body as any).initPosition.y;
 
                     // IMPORTANT: Wake up body
                     body.wakeUp();
