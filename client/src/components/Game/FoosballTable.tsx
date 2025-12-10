@@ -96,7 +96,7 @@ export function FoosballTable() {
         const homeIndices = [0, 1, 3, 5];
         const awayIndices = [2, 4, 6, 7];
 
-        const applyLogic = (indices: number[], ctrl: any, team: 'home' | 'away') => {
+        const applyLogic = (indices: number[], ctrl: any) => {
             let zVel = 0;
             let rotVel = 0;
 
@@ -140,12 +140,12 @@ export function FoosballTable() {
             });
         };
 
-        if (myTeam === 'home') applyLogic(homeIndices, myControls, 'home');
-        else if (myTeam === 'away') applyLogic(awayIndices, myControls, 'away');
+        if (myTeam === 'home') applyLogic(homeIndices, myControls);
+        else if (myTeam === 'away') applyLogic(awayIndices, myControls);
 
         // Apply Remote
-        if (myTeam === 'home') applyLogic(awayIndices, remoteControlsRef.current, 'away');
-        else if (myTeam === 'away') applyLogic(homeIndices, remoteControlsRef.current, 'home');
+        if (myTeam === 'home') applyLogic(awayIndices, remoteControlsRef.current);
+        else if (myTeam === 'away') applyLogic(homeIndices, remoteControlsRef.current);
 
         // 2. Step Physics
         world.step(1 / 60, delta, 3);
