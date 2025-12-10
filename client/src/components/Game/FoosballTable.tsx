@@ -184,62 +184,84 @@ export function FoosballTable() {
                 <meshBasicMaterial color="white" transparent opacity={0.3} wireframe={true} />
             </mesh>
 
-            {/* Walls */}
-            <mesh position={[0, 0.5, 3.6]} receiveShadow castShadow>
-                <boxGeometry args={[12.4, 1, 0.2]} />
+            {/* Side Walls (Long) */}
+            <mesh position={[0, 0.5, -3.8]} receiveShadow castShadow>
+                <boxGeometry args={[12.4, 1, 0.4]} />
                 <meshStandardMaterial color="#4a3b32" />
             </mesh>
-            <mesh position={[0, 0.5, -3.6]} receiveShadow castShadow>
-                <boxGeometry args={[12.4, 1, 0.2]} />
-                <meshStandardMaterial color="#4a3b32" />
-            </mesh>
-            <mesh position={[6.1, 0.5, 0]} receiveShadow castShadow>
-                <boxGeometry args={[0.2, 1, 7.4]} />
-                <meshStandardMaterial color="#4a3b32" />
-            </mesh>
-            <mesh position={[-6.1, 0.5, 0]} receiveShadow castShadow>
-                <boxGeometry args={[0.2, 1, 7.4]} />
+            <mesh position={[0, 0.5, 3.8]} receiveShadow castShadow>
+                <boxGeometry args={[12.4, 1, 0.4]} />
                 <meshStandardMaterial color="#4a3b32" />
             </mesh>
 
-            {/* Goals Visuals */}
-            {/* Home Goal (Left) */}
-            <group position={[-6.4, 0.5, 0]}>
-                <mesh castShadow receiveShadow position={[0, 0, -2]}>
-                    <boxGeometry args={[0.5, 2, 0.1]} />
-                    <meshStandardMaterial color="#333" />
+            {/* Corner Walls (Leaving gap for goal) */}
+            {/* Left Top */}
+            <mesh position={[-6.2, 0.5, -2.3]} receiveShadow castShadow>
+                <boxGeometry args={[0.4, 1, 2.6]} />
+                <meshStandardMaterial color="#4a3b32" />
+            </mesh>
+            {/* Left Bottom */}
+            <mesh position={[-6.2, 0.5, 2.3]} receiveShadow castShadow>
+                <boxGeometry args={[0.4, 1, 2.6]} />
+                <meshStandardMaterial color="#4a3b32" />
+            </mesh>
+            {/* Right Top */}
+            <mesh position={[6.2, 0.5, -2.3]} receiveShadow castShadow>
+                <boxGeometry args={[0.4, 1, 2.6]} />
+                <meshStandardMaterial color="#4a3b32" />
+            </mesh>
+            {/* Right Bottom */}
+            <mesh position={[6.2, 0.5, 2.3]} receiveShadow castShadow>
+                <boxGeometry args={[0.4, 1, 2.6]} />
+                <meshStandardMaterial color="#4a3b32" />
+            </mesh>
+
+
+            {/* Goal Boxes (Visuals) */}
+
+            {/* Home Goal Box (Left) */}
+            <group position={[-7.0, 0.5, 0]}>
+                {/* Back Netting */}
+                <mesh position={[-0.5, 0, 0]} receiveShadow>
+                    <boxGeometry args={[0.1, 1, 2.2]} />
+                    <meshStandardMaterial color="#111" emissive="#00ffff" emissiveIntensity={0.2} transparent opacity={0.8} />
                 </mesh>
-                <mesh castShadow receiveShadow position={[0, 0, 2]}>
-                    <boxGeometry args={[0.5, 2, 0.1]} />
-                    <meshStandardMaterial color="#333" />
+                {/* Top/Bottom Frame */}
+                <mesh position={[0, 0.45, 0]}>
+                    <boxGeometry args={[1, 0.1, 2.2]} />
+                    <meshStandardMaterial color="#222" />
                 </mesh>
-                <mesh castShadow receiveShadow position={[0, 1, 0]}>
-                    <boxGeometry args={[0.5, 0.1, 4]} />
-                    <meshStandardMaterial color="#333" />
+                <mesh position={[0, -0.45, 0]}>
+                    <boxGeometry args={[1, 0.1, 2.2]} />
+                    <meshStandardMaterial color="#222" />
                 </mesh>
-                <mesh position={[0, 0, 0]}>
-                    <boxGeometry args={[0.1, 1.8, 3.8]} />
-                    <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.5} transparent opacity={0.2} />
+                {/* Floor glow */}
+                <mesh position={[0, -0.4, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                    <planeGeometry args={[1, 2]} />
+                    <meshBasicMaterial color="#00ffff" transparent opacity={0.3} />
                 </mesh>
             </group>
 
-            {/* Away Goal (Right) */}
-            <group position={[6.4, 0.5, 0]}>
-                <mesh castShadow receiveShadow position={[0, 0, -2]}>
-                    <boxGeometry args={[0.5, 2, 0.1]} />
-                    <meshStandardMaterial color="#333" />
+            {/* Away Goal Box (Right) */}
+            <group position={[7.0, 0.5, 0]}>
+                {/* Back Netting */}
+                <mesh position={[0.5, 0, 0]} receiveShadow>
+                    <boxGeometry args={[0.1, 1, 2.2]} />
+                    <meshStandardMaterial color="#111" emissive="#e879f9" emissiveIntensity={0.2} transparent opacity={0.8} />
                 </mesh>
-                <mesh castShadow receiveShadow position={[0, 0, 2]}>
-                    <boxGeometry args={[0.5, 2, 0.1]} />
-                    <meshStandardMaterial color="#333" />
+                {/* Top/Bottom Frame */}
+                <mesh position={[0, 0.45, 0]}>
+                    <boxGeometry args={[1, 0.1, 2.2]} />
+                    <meshStandardMaterial color="#222" />
                 </mesh>
-                <mesh castShadow receiveShadow position={[0, 1, 0]}>
-                    <boxGeometry args={[0.5, 0.1, 4]} />
-                    <meshStandardMaterial color="#333" />
+                <mesh position={[0, -0.45, 0]}>
+                    <boxGeometry args={[1, 0.1, 2.2]} />
+                    <meshStandardMaterial color="#222" />
                 </mesh>
-                <mesh position={[0, 0, 0]}>
-                    <boxGeometry args={[0.1, 1.8, 3.8]} />
-                    <meshStandardMaterial color="#e879f9" emissive="#e879f9" emissiveIntensity={0.5} transparent opacity={0.2} />
+                {/* Floor glow */}
+                <mesh position={[0, -0.4, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                    <planeGeometry args={[1, 2]} />
+                    <meshBasicMaterial color="#e879f9" transparent opacity={0.3} />
                 </mesh>
             </group>
 

@@ -30,21 +30,48 @@ export function usePhysicsEngine() {
         world.addBody(ground);
 
         // Walls
-        const wallShape = new CANNON.Box(new CANNON.Vec3(6.2, 0.5, 0.1));
-        const wall1 = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(0, 0.5, 3.6), material: wallMat });
-        wall1.addShape(wallShape);
+        const wallThickness = 0.2;
+        const wallHeight = 0.5;
+        const playFieldLength = 6.0; // x = -6 to 6
+        const playFieldWidth = 3.6;  // z = -3.6 to 3.6
+        const goalWidth = 2.0;       // Opening size
+
+        const longWallShape = new CANNON.Box(new CANNON.Vec3(playFieldLength + 0.2, wallHeight, wallThickness));
+
+        // Top Wall (z = -3.6)
+        const wall1 = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(0, wallHeight, -playFieldWidth - wallThickness), material: wallMat });
+        wall1.addShape(longWallShape);
         world.addBody(wall1);
-        const wall2 = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(0, 0.5, -3.6), material: wallMat });
-        wall2.addShape(wallShape);
+
+        // Bottom Wall (z = 3.6)
+        const wall2 = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(0, wallHeight, playFieldWidth + wallThickness), material: wallMat });
+        wall2.addShape(longWallShape);
         world.addBody(wall2);
 
-        const goalWallShape = new CANNON.Box(new CANNON.Vec3(0.1, 0.5, 3.7));
-        const wall3 = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(6.1, 0.5, 0), material: wallMat });
-        wall3.addShape(goalWallShape);
-        world.addBody(wall3);
-        const wall4 = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(-6.1, 0.5, 0), material: wallMat });
-        wall4.addShape(goalWallShape);
-        world.addBody(wall4);
+        // End Walls with Goal Gaps
+        // We need 4 pieces for the corners: Top-Left, Bottom-Left, Top-Right, Bottom-Right
+        const cornerWallWidth = (playFieldWidth * 2 - goalWidth) / 2 / 2; // (7.2 - 2) / 4 = 1.3
+        const cornerWallShape = new CANNON.Box(new CANNON.Vec3(wallThickness, wallHeight, cornerWallWidth));
+
+        const zPos = goalWidth / 2 + cornerWallWidth; // 1 + 1.3 = 2.3
+
+        // Left End (Home Side)
+        const wallTL = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(-playFieldLength - wallThickness, wallHeight, -zPos), material: wallMat }); // Top-Left
+        wallTL.addShape(cornerWallShape);
+        world.addBody(wallTL);
+
+        const wallBL = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(-playFieldLength - wallThickness, wallHeight, zPos), material: wallMat }); // Bottom-Left
+        wallBL.addShape(cornerWallShape);
+        world.addBody(wallBL);
+
+        // Right End (Away Side)
+        const wallTR = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(playFieldLength + wallThickness, wallHeight, -zPos), material: wallMat }); // Top-Right
+        wallTR.addShape(cornerWallShape);
+        world.addBody(wallTR);
+
+        const wallBR = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(playFieldLength + wallThickness, wallHeight, zPos), material: wallMat }); // Bottom-Right
+        wallBR.addShape(cornerWallShape);
+        world.addBody(wallBR);
 
         // Ball
         const bBody = new CANNON.Body({ mass: 0.45, shape: new CANNON.Sphere(0.2), position: new CANNON.Vec3(0, 1, 0), material: ballMat });
@@ -57,17 +84,18 @@ export function usePhysicsEngine() {
         world.addBody(bBody);
         ballBody.current = bBody;
 
-        // Goal Sensors (Triggers)
-        const goalShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 2.0)); // Width of goal
+        // Goal Sensors (Triggers) placed DEEP inside the goal
+        const goalDepth = 1.0;
+        const goalSensorShape = new CANNON.Box(new CANNON.Vec3(0.2, 0.5, goalWidth / 2));
 
-        // Home Goal (Left side, defended by Red/Home) -> If ball hits this, AWAY scores
-        const homeGoal = new CANNON.Body({ isTrigger: true, position: new CANNON.Vec3(-6.5, 0.5, 0) });
-        homeGoal.addShape(goalShape);
+        // Home Goal Sensor (Left) - Placed at x = -7.0 (well behind the line at -6.0)
+        const homeGoal = new CANNON.Body({ isTrigger: true, position: new CANNON.Vec3(-(playFieldLength + goalDepth), 0.5, 0) });
+        homeGoal.addShape(goalSensorShape);
         world.addBody(homeGoal);
 
-        // Away Goal (Right side, defended by Blue/Away) -> If ball hits this, HOME scores
-        const awayGoal = new CANNON.Body({ isTrigger: true, position: new CANNON.Vec3(6.5, 0.5, 0) });
-        awayGoal.addShape(goalShape);
+        // Away Goal Sensor (Right) - Placed at x = 7.0
+        const awayGoal = new CANNON.Body({ isTrigger: true, position: new CANNON.Vec3(playFieldLength + goalDepth, 0.5, 0) });
+        awayGoal.addShape(goalSensorShape);
         world.addBody(awayGoal);
 
         goals.current = { home: homeGoal, away: awayGoal };
